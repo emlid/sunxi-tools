@@ -19,7 +19,7 @@
 # Windows predefines OS in the environment (to "Windows_NT"), otherwise use uname
 OS ?= $(shell uname)
 
-CC ?= gcc
+CC = gcc
 DEFAULT_CFLAGS := -std=c99
 DEFAULT_CFLAGS += -Wall -Wextra -Wno-unused-result
 
@@ -116,8 +116,8 @@ sunxi-fexc: fexc.h script.h script.c \
 	script_fex.h script_fex.c
 
 LIBUSB = libusb-1.0
-LIBUSB_CFLAGS ?= `pkg-config --cflags $(LIBUSB)`
-LIBUSB_LIBS ?= `pkg-config --libs $(LIBUSB)`
+LIBUSB_CFLAGS = -IC:/libusb/include/libusb-1.0/
+LIBUSB_LIBS = -LC:/libusb/MS32/dll/ -llibusb-1.0
 ifeq ($(OS),Windows_NT)
 	# Windows lacks mman.h / mmap()
 	DEFAULT_CFLAGS += -DNO_MMAP
