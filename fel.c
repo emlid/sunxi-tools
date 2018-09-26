@@ -554,6 +554,28 @@ void aw_restore_and_enable_mmu(feldev_handle *dev,
 	free(tt);
 }
 
+BOOLEAN winnanosleep(LONGLONG ns){
+	/* Declarations */
+	HANDLE timer;	/* Timer handle */
+	LARGE_INTEGER li;	/* Time defintion */
+	/* Create timer */
+	if(!(timer = CreateWaitableTimer(NULL, TRUE, NULL)))
+		return FALSE;
+	/* Set timer properties */
+	li.QuadPart = -ns;
+	if(!SetWaitableTimer(timer, &li, 0, NULL, NULL, FALSE)){
+		CloseHandle(timer);
+		return FALSE;
+	}
+	/* Start & wait for timer */
+	WaitForSingleObject(timer, INFINITE);
+	/* Clean resources */
+	CloseHandle(timer);
+	/* Slept without problems */
+	return TRUE;
+}
+
+
 /*
  * Maximum size of SPL, at the same time this is the start offset
  * of the main U-Boot image within u-boot-sunxi-with-spl.bin
@@ -683,9 +705,7 @@ void aw_fel_write_and_execute_spl(feldev_handle *dev, uint8_t *buf, size_t len)
 	free(thunk_buf);
 
 	/* TODO: Try to find and fix the bug, which needs this workaround */
-	struct timespec req = { .tv_nsec = 250000000 }; /* 250ms */
-	nanosleep(&req, NULL);
-
+        winnanosleep(25000000);
 	/* Read back the result and check if everything was fine */
 	aw_fel_read(dev, soc_info->spl_addr + 4, header_signature, 8);
 	if (strcmp(header_signature, "eGON.FEL") != 0)
